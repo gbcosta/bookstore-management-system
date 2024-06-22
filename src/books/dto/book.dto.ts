@@ -1,27 +1,21 @@
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsInt } from 'class-validator';
 
 export class BookDto {
-  constructor(init: {
-    name: string;
-    pages: number;
-    price: number;
-    genre: string;
-  }) {
-    this.name = init.name;
-    this.pages = init.pages;
-    this.price = init.price;
-    this.genre = init.genre;
-
-    this.id = Math.floor(Math.random() * 1000);
-  }
   @IsString()
   name: string;
-  @IsNumber()
+
+  @IsInt()
   pages: number;
-  @IsNumber()
+
+  @IsInt()
   price: number;
+
   @IsString()
   genre: string;
-  @IsNumber()
-  id: number;
+
+  @IsString()
+  author: string;
+
+  @IsString()
+  language: string;
 }

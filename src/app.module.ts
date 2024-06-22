@@ -14,10 +14,10 @@ import { Book } from './books/books.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
-      port: 5432,
-      username: 'admin',
-      password: 'admin',
-      database: 'test',
+      port: Number(process.env.PORT),
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
+      database: process.env.DATABASE,
       entities: [Book],
       synchronize: true,
     }),
@@ -26,4 +26,6 @@ import { Book } from './books/books.entity';
   controllers: [BooksController],
   providers: [BooksService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {}
+}

@@ -1,44 +1,96 @@
 import { Injectable } from '@nestjs/common';
 import { SearchAllBooksDto } from './dto/searchBooks.dto';
 import { BookDto } from './dto/book.dto';
-import { CreateBookDto } from './dto/createBook.dto';
 import { UpdateBookDto } from './dto/updateBook.dto';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, LessThanOrEqual, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './books.entity';
+
+const MAX_PRICE = 2147483647;
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
+    private dataSource: DataSource,
   ) {}
-  findAll(query: SearchAllBooksDto) {}
 
-  find(id: number) {}
-
-  async create(createBook: CreateBookDto) {
-    const book = this.bookRepository.create({
-      name: 'Lord Of The Rings',
-      pages: 1000,
-      price: 30,
-      author: 'Tolkien',
-      language: 'english',
-    });
-
-    if (!book) return;
-
+  async findAll(query: SearchAllBooksDto) {
     try {
-      await this.bookRepository.insert(book);
-    } catch (e) {
-      console.log(e);
-      return;
-    }
+      const books = await this.bookRepository.findBy({
+        price: LessThanOrEqual(query.price ?? MAX_PRICE),
+        genre: query.genre ? query.genre : Like('%'),
+        name: Like(`%${query.name}%`),
+      });
 
-    console.log('finalizou');
+      return books;
+    } catch (e) {
+      return e;
+    }
   }
 
-  update(id: number, newBook: UpdateBookDto) {}
+  async find(id: number) {
+    try {
+      const book = await this.bookRepository.findOneBy({ id });
+      return book;
+    } catch (e) {
+      return e;
+    }
+  }
 
-  delete(id: number) {}
+  async create(createBook: BookDto): Promise<Book | Error> {
+    try {
+      const { name, pages, price, author, language, genre } = createBook;
+      const book = this.bookRepository.create({
+        name,
+        pages,
+        price,
+        author,
+        language,
+        genre,
+      });
+
+      await this.bookRepository.insert(book);
+
+      return book;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  async update(id: number, newBook: UpdateBookDto): Promise<Book | Error> {
+    try {
+      const book = await this.bookRepository.findOneBy({ id: id });
+
+      const updateFields = Object.fromEntries(
+        Object.entries(newBook).filter(([_, value]) => {
+          if (value !== undefined) {
+            return value;
+          }
+        }),
+      );
+
+      await this.bookRepository.save({ ...updateFields, id: book.id });
+
+      const bookResult = await this.bookRepository.findOneBy({ id: id });
+
+      return bookResult;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  async delete(id: number) {
+    try {
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(Book)
+        .where('id = :id', { id: id })
+        .execute();
+    } catch (e) {
+      return e;
+    }
+  }
 }

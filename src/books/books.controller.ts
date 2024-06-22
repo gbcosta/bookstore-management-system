@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { SearchAllBooksDto } from './dto/searchBooks.dto';
-import { CreateBookDto } from './dto/createBook.dto';
+import { BookDto } from './dto/book.dto';
 import { UpdateBookDto } from './dto/updateBook.dto';
 
 @Controller('books')
@@ -18,27 +18,27 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Get('findAll')
-  findAll(@Query() query: SearchAllBooksDto) {
-    return this.booksService.findAll(query);
+  async findAll(@Query() query: SearchAllBooksDto) {
+    return await this.booksService.findAll(query);
   }
 
   @Get(':id')
   async find(@Param('id') id: number) {
-    return this.booksService.find(id);
+    return await this.booksService.find(id);
   }
 
   @Post()
-  create(@Body() createBook: CreateBookDto) {
-    return this.booksService.create(createBook);
+  async create(@Body() book: BookDto) {
+    return await this.booksService.create(book);
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() newBook: UpdateBookDto) {
-    return this.booksService.update(id, newBook);
+  async update(@Param('id') id: number, @Body() newBook: UpdateBookDto) {
+    return await this.booksService.update(id, newBook);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: number) {
+  async delete(@Param('id') id: number) {
     return this.booksService.delete(id);
   }
 }

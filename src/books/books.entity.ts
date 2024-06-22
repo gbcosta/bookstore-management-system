@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Book {
@@ -19,4 +19,7 @@ export class Book {
 
   @Column()
   language: string;
+
+  @Column()
+  genre: string;
 }
